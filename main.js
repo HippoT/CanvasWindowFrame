@@ -1,4 +1,4 @@
-var width = window.innerWidth;
+var width = window.innerWidth - 500;
 var height = window.innerHeight;
 
 var stage = new Konva.Stage({
@@ -14,6 +14,7 @@ stage.add(layer);
 var widthInput = document.getElementById('inputWidth');
 var heightInput = document.getElementById('inputHeight');
 var profileWidthInput = document.getElementById('inputProfileWidth');
+var zoomInput = document.getElementById('inputZoom');
 
 function createFrame(frameWidth, frameHeight, padding) {
     //var padding = 70;
@@ -369,11 +370,12 @@ function updateCanvas() {
     var frameWidth = parseInt(widthInput.value, 10);
     var frameHeight = parseInt(heightInput.value, 10);
     var frameProfileWidth = parseInt(profileWidthInput.value, 10);
+    var zoom = parseFloat(zoomInput.value);
 
     var wr = stage.width() / frameWidth;
     var hr = stage.height() / frameHeight;
 
-    var ratio = Math.min(wr, hr) * 0.8;
+    var ratio = Math.min(wr, hr) * zoom;
 
     var frameOnScreenWidth = frameWidth * ratio;
     var frameOnScreenHeight = frameHeight * ratio;
@@ -381,8 +383,8 @@ function updateCanvas() {
 
     var group = new Konva.Group({});
 
-    group.x(Math.round(stage.width() / 2 - frameOnScreenWidth / 2) + 0.5);
-    group.y(Math.round(stage.height() / 2 - frameOnScreenHeight / 2) + 0.5);
+    group.x(Math.round(stage.width() * 0.5 - frameOnScreenWidth * 0.5));
+    group.y(Math.round(stage.height() * 0.5 - frameOnScreenHeight * 0.5));
 
     layer.add(group);
 
@@ -406,9 +408,13 @@ heightInput.addEventListener('input', updateCanvas);
 profileWidthInput.addEventListener('change', updateCanvas);
 profileWidthInput.addEventListener('input', updateCanvas);
 
+zoomInput.addEventListener("change", updateCanvas);
+
+
 // set default value
 widthInput.value = 1000;
 heightInput.value = 2000;
 profileWidthInput.value = 70;
+zoomInput.value = 0.5;
 
 updateCanvas();

@@ -6,24 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Canvas Window Frame Designer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="style.css" />
 </head>
 
-<body>
+<body class="container-fluid">
+    <div class="row">
+        <div class="col-sm-2 alert alert-secondary">
+            <div class="form-group row">
+                <label class="col-sm-6 col-form-label">Width</label>
+                <div class="col-sm-6">
+                    <input id="inputWidth" class="form-control" type="number" placeholder="Width" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-form-label">Height</label>
+                <div class="col-sm-6">
+                    <input id="inputHeight" class="form-control" type="number" placeholder="Profile Width" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-form-label">Profile Width</label>
+                <div class="col-sm-6">
+                    <input id="inputProfileWidth" class="form-control" type="number" placeholder="Profile Width" />
+                </div>
+            </div>
+            <div class="form-group row">
+                    <label class="col-sm-6 col-form-label">Zoom</label>
+                    <div class="col-sm-6">
+                        <input id="inputZoom" class="form-control-range" type="range" min="0" max="1" step="0.1" value="0.5"/>
+                    </div>
+                </div>
+        </div>
+        <!-- <div>
+            <canvas id="contentWindowFrame" width="1000" height="800">
 
-    <div>
-        <input id="inputWidth" type="number" placeholder="Width"/>
-        <input id="inputHeight" type="number" placeholder="Height" />
-        <input id="inputProfileWidth" type="number" placeholder="Profile Width"/>
+            </canvas>
+        </div> -->
+        <div class="col-sm-9">
+            <div class="">
+                <div id="contentWindowFrame"></div>
+            </div>
+        </div>
     </div>
-    <!-- <div>
-        <canvas id="contentWindowFrame" width="1000" height="800">
 
-        </canvas>
-    </div> -->
-    <div id="contentWindowFrame"></div>
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdn.rawgit.com/konvajs/konva/2.4.0/konva.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
     <script src="main.js"></script>
     <!-- <script src="test-component.js"></script> -->
 </body>
