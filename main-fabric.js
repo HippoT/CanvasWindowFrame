@@ -1,6 +1,8 @@
-var width = window.innerWidth - 500;
-var height = window.innerHeight;
-$("#contentWindowFrame").append('<canvas style="border: 1px solid black" id="canvasWindowFrame" width="' + width + '" height="' + height + '"></canvas>')
+$("#contentWindowFrame").css("height", "100vh");
+
+var width = $("#contentWindowFrame").outerWidth();
+var height = $("#contentWindowFrame").outerHeight();
+$("#contentWindowFrame").append('<canvas style="border: 1px solid black" id="canvasWindowFrame" width="' + width + '" height="' + (height - 15) + '"></canvas>')
 
 var canvas = this.__canvas = new fabric.Canvas('canvasWindowFrame');
 
@@ -10,7 +12,7 @@ var profileWidthInput = document.getElementById('inputProfileWidth');
 var zoomInput = document.getElementById('inputZoom');
 
 
-function CreateFrame(frameWidth, frameHeight, frameProfile){
+function CreateFrame(frameWidth, frameHeight, frameProfile, startPoint){
   var fillColor = "white";
 
   var shadow = {
@@ -66,11 +68,12 @@ function CreateFrame(frameWidth, frameHeight, frameProfile){
   var glass = CreateGlass(frameWidth, frameHeight, frameProfile, {x : 0, y : 0});
   
   var group = new fabric.Group([topPolygon, leftPolygon, botPolygon, rightPolygon, glass], {
-    left: 0,
-    top: 0
+    left: startPoint.x,
+    top: startPoint.y,
+    selectable: false
   });
 
-  CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group);
+  CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group, startPoint);
 
   group.setShadow(shadow);
   return group;
@@ -87,7 +90,7 @@ function CreatePolygon(points, fillColor, startPoint){
     fill: fillColor,
     selectable: true,
     objectCaching: false,
-    strokeWidth: 0.5, 
+    strokeWidth: 1, 
     stroke: 'black',
     strokeLineJoin: "round"
   });
@@ -109,14 +112,14 @@ function CreateGlass(frameWidth, frameHeight, frameProfile, startPoint){
 }
 
 
-function CreateHandle(url, startPoint, group){
+function CreateHandle(url, startPoint, group, groupPoint){
   fabric.Image.fromURL(url, function(img){
     var imageHeight = img.getScaledHeight();
     var imageWidth = img.getScaledWidth();
 
     img.set({
-      left: (startPoint.x - imageWidth / 2),
-      top: (startPoint.y - imageHeight / 2)
+      left: (startPoint.x - imageWidth / 2 + groupPoint.x),
+      top: (startPoint.y - imageHeight / 2 + groupPoint.y)
     });
 
     group.addWithUpdate(img);
@@ -131,8 +134,24 @@ function UpdateCanvas() {
   var frameHeight = parseInt(heightInput.value, 10);
   var frameProfile = parseInt(profileWidthInput.value, 10);
 
+  var onScreenWidth = $("#canvasWindowFrame").outerWidth();
+  var onScreenHeight = $("#canvasWindowFrame").outerHeight();
+
+  var wr = onScreenWidth / frameWidth;
+  var hr = onScreenHeight / frameHeight;
+
+  var ratio = Math.min(wr, hr) * 0.5;
+
+  var frameOnScreenWidth = Math.round(frameWidth * ratio);
+  var frameOnScreenHeight = Math.round(frameHeight * ratio);
+  var frameOnScreenProfile = Math.round(frameProfile * ratio);
+
+  var x = Math.round((onScreenWidth - frameOnScreenWidth) * 0.5);
+  var y = Math.round((onScreenHeight - frameOnScreenHeight) * 0.5); 
+
+  console.log(frameOnScreenWidth);
   //var groupFrame = CreateFrameByPath(200, 200, 30);
-  var groupFrame = CreateFrame(frameWidth, frameHeight, frameProfile);
+  var groupFrame = CreateFrame(frameOnScreenWidth, frameOnScreenHeight, frameOnScreenProfile, {x : x, y : y});
 }
 
 function AddCanvas(groupFrame){
@@ -148,8 +167,8 @@ heightInput.addEventListener('input', UpdateCanvas);
 profileWidthInput.addEventListener('change', UpdateCanvas);
 profileWidthInput.addEventListener('input', UpdateCanvas);
 
-widthInput.value = 500;
-heightInput.value = 500;
-profileWidthInput.value = 50;
+widthInput.value = 5000;
+heightInput.value = 5000;
+profileWidthInput.value = 500;
 
 UpdateCanvas();
