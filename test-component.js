@@ -1,23 +1,36 @@
-var width = window.innerWidth;
+var width = window.innerWidth - 500;
 var height = window.innerHeight;
+$("#contentWindowFrame").append('<canvas style="border: 1px solid black" id="canvasWindowFrame" width="' + width + '" height="' + height + '"></canvas>')
 
-var stage = new Konva.Stage({
-    container: 'contentWindowFrame',
-    width: width,
-    height: height
+var canvas = this.__canvas = new fabric.Canvas('canvasWindowFrame');
+
+var circle = new fabric.Circle({
+  radius: 100,
+  fill: '#eef',
+  scaleY: 0.5,
+  originX: 'center',
+  originY: 'center'
 });
 
-var layer = new Konva.Layer();
-var padding = 70;
-var frameWidth = 500;
-
-var redLine = new Konva.Line({
-  points: [0, 0,frameWidth, 0,frameWidth - padding, padding,padding, padding],
-  fill: 'red',
-  stroke: 'black',
-  strokeWidth: 5,
+var rect = new fabric.Rect({
+  originX: 'center',
+  originY: 'center',
+  fill: 'green',
+  width: 50, 
+  height: 80
 });
 
-redLine.closed(true);
-layer.add(redLine);
-stage.add(layer);
+var text = new fabric.Text('hello world', {
+  fontSize: 30,
+  // originX: 'center',
+  // originY: 'center'
+  left: 200,
+  top: 200
+});
+
+var group = new fabric.Group([circle, rect, text], {
+  left: 150,
+  top: 100
+});
+
+canvas.add(group);
