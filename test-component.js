@@ -7,18 +7,16 @@ var canvas = this.__canvas = new fabric.Canvas('canvasWindowFrame');
 var circle = new fabric.Circle({
   radius: 100,
   fill: '#eef',
-  scaleY: 0.5,
-  originX: 'center',
-  originY: 'center'
+  scaleY: 0.5
 });
 
 var rect = new fabric.Rect({
-  originX: 'center',
-  originY: 'center',
   fill: 'green',
-  width: 50, 
+  width: 50,
   height: 80
 });
+
+
 
 var text = new fabric.Text('hello world', {
   fontSize: 30,
@@ -28,9 +26,17 @@ var text = new fabric.Text('hello world', {
   top: 200
 });
 
-var group = new fabric.Group([circle, rect, text], {
-  left: 150,
-  top: 100
-});
+fabric.Image.fromURL("./images/handle.png", function (img) {
+  img.set({
+    originX: 'center',
+    originY: 'center'
+  });
 
-canvas.add(group);
+  var group = new fabric.Group([circle, rect, text, img], {
+    left: 150,
+    top: 100
+  });
+
+
+  canvas.add(group);
+});
