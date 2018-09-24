@@ -76,15 +76,16 @@ function CreateFrame(frameWidth, frameHeight, frameProfile, startPoint){
   CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group, startPoint);
 
   group.setShadow(shadow);
+
   return group;
 }
 
 function CreatePolygon(points, fillColor, startPoint){
-  var clonedPoints = points.map(function(o){
-    return fabric.util.object.clone(o);
-  });
+  // var clonedPoints = points.map(function(o){
+  //   return fabric.util.object.clone(o);
+  // });
 
-  var polygon = new fabric.Polygon(clonedPoints, {
+  var polygon = new fabric.Polygon(points, {
     left: startPoint.x,
     top: startPoint.y,
     fill: fillColor,
@@ -123,6 +124,26 @@ function CreateHandle(url, startPoint, group, groupPoint){
     });
 
     group.addWithUpdate(img);
+
+    group.on("mousedown", function(e){
+      var a = e.target;
+      if(a.item(0).fill == "white"){
+        a.item(0).set({fill : 'black'});
+        a.item(1).set({fill : 'black'});
+        a.item(2).set({fill : 'black'});
+        a.item(3).set({fill : 'black'});
+      }else{
+        a.item(0).set({fill : 'white'});
+        a.item(1).set({fill : 'white'});
+        a.item(2).set({fill : 'white'});
+        a.item(3).set({fill : 'white'});
+      }
+  
+  
+      // canvas.renderAll();
+      console.log(a.item(0));
+      console.log($(this));
+    });
 
     AddCanvas(group);
   });
