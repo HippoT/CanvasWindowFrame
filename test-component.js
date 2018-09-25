@@ -47,10 +47,23 @@ var handle = GetHandle({
   }
 });
 
-var group = new fabric.Group([layerFrame, layerWindow, glass, handle], {
+var cill = GetCill({
+  color: "white",
+  width: 600,
+  height: 20,
+  originX: -50,
+  originY: 500
+})
+
+var group = new fabric.Group([layerFrame, layerWindow], {
   left: 100,
   top: 100,
   selectable: false
 });
 
 canvas.add(group);
+
+
+function Draw(data){
+  
+}

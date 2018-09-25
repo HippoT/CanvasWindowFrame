@@ -1,13 +1,21 @@
 function GetFrame(frameInfo) {
 
     var fillColor = frameInfo.color;
-    var frameWidth = frameInfo.width;
-    var frameHeight = frameInfo.height;
-    var frameProfile = frameInfo.profile;
     var originPoint = frameInfo.originPoint;
 
+    var originWidth = 500;
+    var originHeight = 500;
+    var originProfile = 60;
+
+    if(frameInfo.width){
+        originWidth = originWidth * (frameInfo.width / 1000);
+        originHeight = originHeight * (frameInfo.height / 1000);
+        originProfile = originProfile * (frameInfo.profile / 60);
+        
+    }
+
     var shadow = {
-        color: 'rgba(0,0,0,0.6)',
+        color: 'rgba(0,0,0,0.4)',
         blur: 20,
         offsetX: 10,
         offsetY: 10,
@@ -19,9 +27,9 @@ function GetFrame(frameInfo) {
     //top
     var topPoints = [
         { x: 0, y: 0 },
-        { x: frameWidth, y: 0 },
-        { x: frameWidth - frameProfile, y: frameProfile },
-        { x: frameProfile, y: frameProfile }
+        { x: originWidth, y: 0 },
+        { x: originWidth - originProfile, y: originProfile },
+        { x: originProfile, y: originProfile }
     ]
     var topPolygon = CreatePolygon(topPoints, fillColor, { x: 0, y: 0 });
     //topPolygon.setShadow(shadow);
@@ -29,31 +37,31 @@ function GetFrame(frameInfo) {
     //Left
     var leftPoints = [
         { x: 0, y: 0 },
-        { x: frameProfile, y: frameProfile },
-        { x: frameProfile, y: frameHeight - frameProfile },
-        { x: 0, y: frameHeight }
+        { x: originProfile, y: originProfile },
+        { x: originProfile, y: originHeight - originProfile },
+        { x: 0, y: originHeight }
     ]
     var leftPolygon = CreatePolygon(leftPoints, fillColor, { x: 0, y: 0 });
     //leftPolygon.setShadow(shadow);
 
     //botton
     var botPoints = [
-        { x: 0, y: frameHeight },
-        { x: frameProfile, y: frameHeight - frameProfile },
-        { x: frameWidth - frameProfile, y: frameHeight - frameProfile },
-        { x: frameWidth, y: frameHeight }
+        { x: 0, y: originHeight },
+        { x: originProfile, y: originHeight - originProfile },
+        { x: originWidth - originProfile, y: originHeight - originProfile },
+        { x: originWidth, y: originHeight }
     ]
-    var botPolygon = CreatePolygon(botPoints, fillColor, { x: 0, y: frameHeight - frameProfile });
+    var botPolygon = CreatePolygon(botPoints, fillColor, { x: 0, y: originHeight - originProfile });
     //botPolygon.setShadow(shadow);
 
     //right
     var rightPoints = [
-        { x: frameWidth, y: 0 },
-        { x: frameWidth, y: frameHeight },
-        { x: frameWidth - frameProfile, y: frameHeight - frameProfile },
-        { x: frameWidth - frameProfile, y: frameProfile }
+        { x: originWidth, y: 0 },
+        { x: originWidth, y: originHeight },
+        { x: originWidth - originProfile, y: originHeight - originProfile },
+        { x: originWidth - originProfile, y: originProfile }
     ];
-    var rightPolygon = CreatePolygon(rightPoints, fillColor, { x: frameWidth - frameProfile, y: 0 })
+    var rightPolygon = CreatePolygon(rightPoints, fillColor, { x: originWidth - originProfile, y: 0 })
     //rightPolygon.setShadow(shadow);
 
     var group = new fabric.Group([topPolygon, leftPolygon, botPolygon, rightPolygon], {
@@ -140,6 +148,20 @@ function GetHandle(handelInfo) {
 
     }
 
-
     return polygon;
+}
+
+function GetCill(cillDetail){
+    var cill = new fabric.Rect({
+        width: cillDetail.width,
+        height: cillDetail.height,
+        strokeWidth: 1,
+        stroke: 'black',
+        strokeLineJoin: "round",
+        fill: cillDetail.color,
+        left: cillDetail.originX,
+        top: cillDetail.originY
+    })
+
+    return cill;
 }
