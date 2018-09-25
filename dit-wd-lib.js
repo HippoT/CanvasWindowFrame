@@ -62,7 +62,9 @@ function GetFrame(frameInfo) {
         selectable: false
     });
 
-    group.setShadow(shadow);
+    if (frameInfo.hasShadow) {
+        group.setShadow(shadow);
+    }
 
     return group;
 }
@@ -83,6 +85,8 @@ function CreatePolygon(points, fillColor, originPoint) {
 }
 
 function GetGlass(glassInfo) {
+    var originPoint = glassInfo.originPoint;
+
     var glass = new fabric.Rect({
         fill: glassInfo.color,
         width: glassInfo.width,
@@ -94,14 +98,48 @@ function GetGlass(glassInfo) {
     return glass;
 }
 
-
 function GetHandle(handelInfo) {
-    var width = handelInfo.width;
-    var height = handelInfo.height;
-    var point = [
-        { x: handelInfo.width, y: 0 },
-        { x: handelInfo.width, y: handelInfo.height },
-        { x: frameWidth - frameProfile, y: frameHeight - frameProfile },
-        { x: frameWidth - frameProfile, y: frameProfile }
-    ];
+    // var width = handelInfo.width;
+    // var height = handelInfo.height;
+    var scale = 1;
+
+    if (handelInfo.scale) {
+        scale = handelInfo.scale;
+    }
+
+    //unit handle size
+    var points = [{ x: 5, y: 0 }, { x: 20, y: 0 }, { x: 22, y: 2 }, { x: 22, y: 4 }, { x: 24, y: 4 }, { x: 24, y: 6 }, { x: 60, y: 8 },
+    { x: 60, y: 14 }, { x: 24, y: 16 }, { x: 8, y: 15 }, { x: 2, y: 10 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 3, y: 2 }];
+
+    for (var i = 0; i < points.length; i++) {
+        points[i].x = Math.round(points[i].x * scale);
+        points[i].y = Math.round(points[i].y * scale);
+    }
+
+    var polygon = CreatePolygon(points, handelInfo.color, handelInfo.originPoint);
+
+    switch (handelInfo.orientation) {
+        case 'left':
+            polygon.set({
+                flipY: true,
+                rotate: 90
+            });
+            break;
+        case 'bottom':
+            polygon.set({
+                flipY: true
+            });
+            break;
+        case 'right':
+            polygon.set({
+                rotate: 90
+            });
+            break;
+        default:
+            break;
+
+    }
+
+
+    return polygon;
 }

@@ -70,7 +70,7 @@ function CreateFrame(frameWidth, frameHeight, frameProfile, startPoint){
   var group = new fabric.Group([topPolygon, leftPolygon, botPolygon, rightPolygon, glass], {
     left: startPoint.x,
     top: startPoint.y,
-    selectable: false
+    selectable: true
   });
 
   CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group, startPoint);
@@ -123,7 +123,7 @@ function CreateHandle(url, startPoint, group, groupPoint){
       top: (startPoint.y - imageHeight / 2 + groupPoint.y)
     });
 
-    group.addWithUpdate(img);
+    //group.addWithUpdate(img);
 
     group.on("mousedown", function(e){
       var a = e.target;
@@ -173,10 +173,13 @@ function UpdateCanvas() {
   console.log(frameOnScreenWidth);
   //var groupFrame = CreateFrameByPath(200, 200, 30);
   var groupFrame = CreateFrame(frameOnScreenWidth, frameOnScreenHeight, frameOnScreenProfile, {x : x, y : y});
+
+  
 }
 
 function AddCanvas(groupFrame){
   canvas.add(groupFrame);
+  canvas.add(GetHandle({color: 'red'}))
 }
 
 widthInput.addEventListener('change', UpdateCanvas);
@@ -193,3 +196,24 @@ heightInput.value = 5000;
 profileWidthInput.value = 500;
 
 UpdateCanvas();
+
+function GetHandle(handelInfo) {
+  // var width = handelInfo.width;
+  // var height = handelInfo.height;
+  var scale = 2;
+
+  if(handelInfo.scale){
+    scale = handelInfo.scale;
+  }
+
+  //unit handle size
+  var points = [{ x: 5, y: 0 }, { x: 20, y: 0 }, { x: 22, y: 2 }, { x: 22, y: 4 }, { x: 24, y: 4 }, { x: 24, y: 6 }, { x: 60, y: 8 }, 
+    { x: 60, y: 14 }, { x: 24, y: 16 }, { x: 8, y: 15 }, { x: 2, y: 10 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 3, y: 2 }];
+
+  for (var i = 0; i < points.length; i++) {
+    points[i].x = Math.round(points[i].x * scale);
+    points[i].y = Math.round(points[i].y * scale);
+  }
+
+  return CreatePolygon(points, handelInfo.color, {x: 0, y: 0});
+}
