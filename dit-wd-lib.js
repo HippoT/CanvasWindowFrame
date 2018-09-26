@@ -3,16 +3,22 @@ function GetFrame(frameInfo) {
     var fillColor = frameInfo.color;
     var originPoint = frameInfo.originPoint;
 
-    var originWidth = 500;
-    var originHeight = 500;
-    var originProfile = 60;
+    // var originWidth = 500;
+    // var originHeight = 500;
+    // var originProfile = 60;
 
-    if(frameInfo.width){
-        originWidth = originWidth * (frameInfo.width / 1000);
-        originHeight = originHeight * (frameInfo.height / 1000);
-        originProfile = originProfile * (frameInfo.profile / 60);
+    // if(frameInfo.width){
+    //     originWidth = originWidth * (frameInfo.width / 1000);
+    //     originHeight = originHeight * (frameInfo.height / 1000);
+    //     originProfile = originProfile * (frameInfo.profile / 60);
         
-    }
+    // }
+
+    var ratio = GetRatio({width: frameInfo.width, height: frameInfo.height, scale: 0.7})
+
+    var originWidth = Math.round(frameInfo.width * ratio);
+    var originHeight = Math.round(frameInfo.height * ratio);
+    var originProfile = Math.round(frameInfo.profile * ratio);
 
     var shadow = {
         color: 'rgba(0,0,0,0.4)',
@@ -64,6 +70,17 @@ function GetFrame(frameInfo) {
     var rightPolygon = CreatePolygon(rightPoints, fillColor, { x: originWidth - originProfile, y: 0 })
     //rightPolygon.setShadow(shadow);
 
+    // var centerPoint = [
+    //     { x: originWidth / 2, y: originProfile / 2 },
+    //     { x: (originWidth + originProfile) / 2, y: originProfile },
+    //     { x: (originWidth + originProfile) / 2, y: originHeight - originProfile },
+    //     { x: originWidth / 2, y: originHeight - originProfile / 2 },
+    //     { x: (originWidth - originProfile) / 2, y: originHeight - originProfile },
+    //     { x: (originWidth - originProfile) / 2, y: originProfile },
+    // ];
+
+    // var centerPolygon = CreatePolygon(centerPoint, fillColor, { x: (originWidth - originProfile) / 2, y: originProfile / 2 })
+
     var group = new fabric.Group([topPolygon, leftPolygon, botPolygon, rightPolygon], {
         left: originPoint.x,
         top: originPoint.y,
@@ -82,6 +99,21 @@ function CreatePolygon(points, fillColor, originPoint) {
         left: originPoint.x,
         top: originPoint.y,
         fill: fillColor,
+        selectable: true,
+        objectCaching: false,
+        strokeWidth: 1,
+        stroke: 'black',
+        strokeLineJoin: "round"
+    });
+
+    return polygon;
+}
+
+function GetPolygon(details) {
+    var polygon = new fabric.Polygon(details.points, {
+        left: details.originPoint.x,
+        top: details.originPoint.y,
+        fill: details.fillColor,
         selectable: true,
         objectCaching: false,
         strokeWidth: 1,
@@ -164,4 +196,19 @@ function GetCill(cillDetail){
     })
 
     return cill;
+}
+
+function GetRatio(size){
+    var frameWidth = parseInt(size.width, 10);
+    var frameHeight = parseInt(size.height, 10);
+  
+    var onScreenWidth = $("#canvasWindowFrame").outerWidth();
+    var onScreenHeight = $("#canvasWindowFrame").outerHeight();
+  
+    var wr = onScreenWidth / frameWidth;
+    var hr = onScreenHeight / frameHeight;
+  
+    var ratio = Math.min(wr, hr) * size.scale;
+
+    return ratio;
 }

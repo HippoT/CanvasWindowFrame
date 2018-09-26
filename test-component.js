@@ -55,15 +55,19 @@ var cill = GetCill({
   originY: 500
 })
 
-var group = new fabric.Group([layerFrame, layerWindow], {
-  left: 100,
-  top: 100,
+var onScreenWidth = $("#canvasWindowFrame").outerWidth();
+var onScreenHeight = $("#canvasWindowFrame").outerHeight();
+
+
+var x = Math.round((onScreenWidth - layerWindow.width) * 0.5);
+var y = Math.round((onScreenHeight - layerWindow.height) * 0.5); 
+
+var group = new fabric.Group([layerWindow], {
+  left: x,
+  top: y,
   selectable: false
 });
 
+
 canvas.add(group);
 
-
-function Draw(data){
-  
-}

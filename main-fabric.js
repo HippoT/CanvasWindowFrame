@@ -70,10 +70,18 @@ function CreateFrame(frameWidth, frameHeight, frameProfile, startPoint){
   var group = new fabric.Group([topPolygon, leftPolygon, botPolygon, rightPolygon, glass], {
     left: startPoint.x,
     top: startPoint.y,
-    selectable: true
+    selectable: false
   });
 
-  CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group, startPoint);
+  //CreateHandle("./images/handle.png", {x : frameWidth / 2, y : frameHeight - frameProfile / 2}, group, startPoint);
+
+  var handle = GetHandle({color: 'red'});
+   handle.set({
+     left: (frameWidth - handle.width / 2),
+     top: (frameHeight - handle.height / 2)
+   });
+
+  group.addWithUpdate(handle);
 
   group.setShadow(shadow);
 
@@ -113,41 +121,39 @@ function CreateGlass(frameWidth, frameHeight, frameProfile, startPoint){
 }
 
 
-function CreateHandle(url, startPoint, group, groupPoint){
-  fabric.Image.fromURL(url, function(img){
-    var imageHeight = img.getScaledHeight();
-    var imageWidth = img.getScaledWidth();
+// function CreateHandle(url, startPoint, group, groupPoint){
+//   fabric.Image.fromURL(url, function(img){
+//     var imageHeight = img.getScaledHeight();
+//     var imageWidth = img.getScaledWidth();
 
-    img.set({
-      left: (startPoint.x - imageWidth / 2 + groupPoint.x),
-      top: (startPoint.y - imageHeight / 2 + groupPoint.y)
-    });
+//     img.set({
+//       left: (startPoint.x - imageWidth / 2 + groupPoint.x),
+//       top: (startPoint.y - imageHeight / 2 + groupPoint.y)
+//     });
 
-    //group.addWithUpdate(img);
+//     //group.addWithUpdate(img);
 
-    group.on("mousedown", function(e){
-      var a = e.target;
-      if(a.item(0).fill == "white"){
-        a.item(0).set({fill : 'black'});
-        a.item(1).set({fill : 'black'});
-        a.item(2).set({fill : 'black'});
-        a.item(3).set({fill : 'black'});
-      }else{
-        a.item(0).set({fill : 'white'});
-        a.item(1).set({fill : 'white'});
-        a.item(2).set({fill : 'white'});
-        a.item(3).set({fill : 'white'});
-      }
+//     // group.on("mousedown", function(e){
+//     //   var a = e.target;
+//     //   if(a.item(0).fill == "white"){
+//     //     a.item(0).set({fill : 'black'});
+//     //     a.item(1).set({fill : 'black'});
+//     //     a.item(2).set({fill : 'black'});
+//     //     a.item(3).set({fill : 'black'});
+//     //   }else{
+//     //     a.item(0).set({fill : 'white'});
+//     //     a.item(1).set({fill : 'white'});
+//     //     a.item(2).set({fill : 'white'});
+//     //     a.item(3).set({fill : 'white'});
+//     //   }
   
   
-      // canvas.renderAll();
-      console.log(a.item(0));
-      console.log($(this));
-    });
+//       // canvas.renderAll();
+//     // });
 
-    AddCanvas(group);
-  });
-}
+//     AddCanvas(group);
+//   });
+// }
 
 function UpdateCanvas() {
   canvas.clear();
@@ -174,13 +180,9 @@ function UpdateCanvas() {
   //var groupFrame = CreateFrameByPath(200, 200, 30);
   var groupFrame = CreateFrame(frameOnScreenWidth, frameOnScreenHeight, frameOnScreenProfile, {x : x, y : y});
 
-  
+  canvas.add(groupFrame);
 }
 
-function AddCanvas(groupFrame){
-  canvas.add(groupFrame);
-  canvas.add(GetHandle({color: 'red'}))
-}
 
 widthInput.addEventListener('change', UpdateCanvas);
 widthInput.addEventListener('input', UpdateCanvas);
