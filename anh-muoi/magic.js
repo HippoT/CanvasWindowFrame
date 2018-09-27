@@ -57,6 +57,8 @@ var c = window._canvas = new fabric.Canvas('c', {
 
 var group;
 
+var model = [];
+
 var frameOpts = {
     width: 300, // width in mm
     height: 400, // height in mm
@@ -81,31 +83,44 @@ function drawWindowJson(json) {
     console.log("no of squares: " + squares);
 
     // draw base frame
-
-    console.log(JsonParse(json.layout, json.w, json.h, json.p));
-    
+   
+    console.log( JsonParse(json.layout, json.w, json.h, json.p));
 }
 
 function JsonParse(layout, w, h, p, {ox = 0, oy = 0}  = {}){
-    var c = [];
-    var r = [];
-    var result;
+    var result = [];
     if(layout.c != undefined){
         var count = layout.c.length;
         for(var i = 0; i < count; i++){
             // c.push({name : 'c', value : JsonParse(layout.c[i], w / count, h, p, {ox : (i * w / count), oy : oy})});
-            var col = JsonParse(layout.c[i], w / count, h, p, {ox : (i * w / count), oy : oy});
-            result = c.concat(col);
+            var col;
+            
+            if(layout.c[i].w){
+                col = JsonParse(layout.c[i], w, h, p, {ox : ((i + 1) * layout.c[i].w), oy : oy});
+            }else if(i == (count - 1)){
+                col = JsonParse(layout.c[i], w, h, p, {ox : (w - (layout.c[i].w * (count - 1))), oy : oy});
+            }else{
+                col = JsonParse(layout.c[i], w, h, p, {ox : (i * w / count), oy : oy});
+            }
+
+            result.push(col);
         }
     }else if(layout.r != undefined){
         var count = layout.r.length;
         for(var i = 0; i < layout.r.length; i++){
             // r.push({name : 'r', value : JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : (i * h / count)})});
-            var row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : (i * h / count)});
-            console.log(row);
-            r.push(row);
+            var row;
+            
+            if(layout.r[i].h){
+                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : ((i + 1) * layout.r[i].h)});
+            }else if(i == (count - 1)){
+                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : h - oy});
+            }else{
+                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : (i * h / count)});
+            }
+
+            result.push(row);
         }
-        return r;
     }else{
         layout.w = w;
         layout.p = p;
