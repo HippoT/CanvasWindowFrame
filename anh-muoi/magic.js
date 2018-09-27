@@ -19,12 +19,12 @@ var testWindow1 = {
             },
             {
                 "r": [
+                    { f: 0, od: "u" },
                     { f: 0, od: "u" }
                 ]
             },
             {
                 "r": [
-                    { f: 0, od: "u" },
                     { f: 0, od: "u" },
                     { f: 1 }
                 ]
@@ -83,51 +83,69 @@ function drawWindowJson(json) {
     console.log("no of squares: " + squares);
 
     // draw base frame
-   
-    console.log( JsonParse(json.layout, json.w, json.h, json.p));
+
+    console.log(JsonParse(json.layout, json.w, json.h, json.p));
 }
 
-function JsonParse(layout, w, h, p, {ox = 0, oy = 0}  = {}){
+function JsonParse(layout, w, h, p, { ox = 0, oy = 0, rox = 0, roy = 0 } = {}) {
     var result = [];
-    if(layout.c != undefined){
+    var offsetX = 0;
+    var offsetY = 0;
+
+    if (layout.c != undefined) {
         var count = layout.c.length;
-        for(var i = 0; i < count; i++){
+
+        for (var i = 0; i < count; i++) {
             // c.push({name : 'c', value : JsonParse(layout.c[i], w / count, h, p, {ox : (i * w / count), oy : oy})});
             var col;
-            
-            if(layout.c[i].w){
-                col = JsonParse(layout.c[i], w, h, p, {ox : ((i + 1) * layout.c[i].w), oy : oy});
-            }else if(i == (count - 1)){
-                col = JsonParse(layout.c[i], w, h, p, {ox : (w - (layout.c[i].w * (count - 1))), oy : oy});
-            }else{
-                col = JsonParse(layout.c[i], w, h, p, {ox : (i * w / count), oy : oy});
+
+            if (layout.c[i].r.length > 1) {
+                col = JsonParse(layout.c[i], w / count, h, p, { ox: offsetX, oy: oy, rox: rox, roy: roy });
+            } else {
+                if (layout.c[i].w == undefined) {
+                    offsetX += w / count;
+                } else {
+                    offsetX += layout.c[i].w;
+                }
+
+                col = JsonParse(layout.c[i], w / count, h, p, { ox: offsetX, oy: oy, rox: rox, roy: roy });
             }
 
             result.push(col);
         }
-    }else if(layout.r != undefined){
+        offsetY = 0;
+    } else if (layout.r != undefined) {
         var count = layout.r.length;
-        for(var i = 0; i < layout.r.length; i++){
+        var coy = 0;
+
+        for (var i = 0; i < layout.r.length; i++) {
             // r.push({name : 'r', value : JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : (i * h / count)})});
-            var row;
-            
-            if(layout.r[i].h){
-                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : ((i + 1) * layout.r[i].h)});
-            }else if(i == (count - 1)){
-                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : h - oy});
-            }else{
-                row = JsonParse(layout.r[i], w, h / count, p, {ox : ox, oy : (i * h / count)});
+            if (layout.r[i].h == undefined) {
+                offsetY += h / count;
+            } else {
+                offsetY += layout.r[i].h;
             }
+
+            if (count > 1) {
+                coy = oy + offsetY;
+            } else {
+                coy = oy;
+            }
+
+            var row = JsonParse(layout.r[i], w, h / count, p, { ox: ox, oy: coy, rox: ox, roy: offsetY });
 
             result.push(row);
         }
-    }else{
+    } else {
         layout.w = w;
         layout.p = p;
         layout.h = h;
         layout.ox = ox;
         layout.oy = oy;
-        return layout; 
+        layout.rox = rox;
+        layout.roy = roy;
+        console.log(layout);
+        return layout;
     }
     return result;
 }
