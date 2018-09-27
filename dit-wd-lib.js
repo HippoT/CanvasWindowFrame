@@ -11,10 +11,10 @@ function GetFrame(frameInfo) {
     //     originWidth = originWidth * (frameInfo.width / 1000);
     //     originHeight = originHeight * (frameInfo.height / 1000);
     //     originProfile = originProfile * (frameInfo.profile / 60);
-        
+
     // }
 
-    var ratio = GetRatio({width: frameInfo.width, height: frameInfo.height, scale: 0.7})
+    var ratio = GetRatio({ width: frameInfo.width, height: frameInfo.height, scale: 0.7 })
 
     var originWidth = Math.round(frameInfo.width * ratio);
     var originHeight = Math.round(frameInfo.height * ratio);
@@ -138,6 +138,51 @@ function GetGlass(glassInfo) {
     return glass;
 }
 
+function OpenDirection(details) {
+
+    // var w = details.width;
+    // var h = details.height;
+    // var hw = w / 2;
+    // var hh = h / 2;
+    // var pointLine = "M ";
+
+    // switch (details.direction) {
+    //     case "l":
+    //         var points = [w, " 0 ", " L 0 ", hh, " ", w, " ", h, " z"];
+    //         pointLine = pointLine.concat(...points);
+    //         break;
+    //     case "r":
+    //         var points = ["0 0 ", " L ", w, " ", hh, " 0 ", h, " z"];
+    //         pointLine = pointLine.concat(...points);
+    //         break;
+    //     case "u":
+    //         var points = ["0 ", h, " L ", hw, " 0 ", w, " ", h, " z"];
+    //         pointLine = pointLine.concat(...points);
+    //         break;
+    //     case "d":
+    //         var points = [w, " ", h, " L ", wh, " 0 ", w, " ", h, " z"];
+    //         pointLine = pointLine.concat(...points);
+    //         break;
+    // }
+    var pointLine = "M ";
+    for (var i = 0; i < details.points.length; i++) {
+        if (i == 1)
+            pointLine += "L ";
+        pointLine += (details.points[i].x + " " + details.points[i].y + " ");
+    }
+
+    var line = new fabric.Path(pointLine, {
+        stroke: "black",
+        objectCaching: false,
+        strokeWidth: 5,
+        left: details.originPoint.x,
+        top: details.originPoint.y,
+        fill: ""
+    })
+
+    return line;
+}
+
 function GetHandle(handelInfo) {
     // var width = handelInfo.width;
     // var height = handelInfo.height;
@@ -183,7 +228,7 @@ function GetHandle(handelInfo) {
     return polygon;
 }
 
-function GetCill(cillDetail){
+function GetCill(cillDetail) {
     var cill = new fabric.Rect({
         width: cillDetail.width,
         height: cillDetail.height,
@@ -198,16 +243,16 @@ function GetCill(cillDetail){
     return cill;
 }
 
-function GetRatio(size){
+function GetRatio(size) {
     var frameWidth = parseInt(size.width, 10);
     var frameHeight = parseInt(size.height, 10);
-  
+
     var onScreenWidth = $("#canvasWindowFrame").outerWidth();
     var onScreenHeight = $("#canvasWindowFrame").outerHeight();
-  
+
     var wr = onScreenWidth / frameWidth;
     var hr = onScreenHeight / frameHeight;
-  
+
     var ratio = Math.min(wr, hr) * size.scale;
 
     return ratio;

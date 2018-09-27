@@ -4,7 +4,7 @@ $("#contentWindowFrame").append('<canvas style="border: 1px solid black" id="can
 
 var canvas = this.__canvas = new fabric.Canvas('canvasWindowFrame');
 
-function GetLayer (elements, wr, hr, s) {
+function GetLayer (elements, pr, wr, hr, s) {
     var group = new fabric.Group([], {
         selectable: false
     });
@@ -15,8 +15,9 @@ function GetLayer (elements, wr, hr, s) {
             if (elements[i].constructor === Object) {
                 var fnName = elements[i].function;
                 var fnParams = elements[i].argument;
-                fnParams.points = CalculatePoints(fnParams.points, wr, hr, s);
-                fnParams.originPoint = CalculateOriginPoint(fnParams.originPoint, wr, hr, s);
+                var p = parseInt(fnParams.p) * pr;
+                fnParams.points = CalculatePoints(fnParams.points, p, wr, hr, s);
+                fnParams.originPoint = CalculateOriginPoint(fnParams.originPoint, p, wr, hr, s);
                 var element = window[fnName].apply(null,[fnParams]);
                 group.addWithUpdate(element);
             }else{
@@ -28,8 +29,9 @@ function GetLayer (elements, wr, hr, s) {
     if(elements.constructor === Object){
         var fnName = elements.function;
         var fnParams = elements.argument;
-        fnParams.points = CalculatePoints(fnParams.points, wr, hr, s);
-        fnParams.originPoint = CalculateOriginPoint(fnParams.originPoint, wr, hr, s);
+        var p = parseInt(fnParams.p) * pr;
+        fnParams.points = CalculatePoints(fnParams.points, p, wr, hr, s);
+        fnParams.originPoint = CalculateOriginPoint(fnParams.originPoint, p, wr, hr, s);
         var element = window[fnName].apply(null,[fnParams]);
         group.addWithUpdate(element);
     }
@@ -37,17 +39,17 @@ function GetLayer (elements, wr, hr, s) {
     return group;
 }
 
-function CalculatePoints(points, wr, hr, s){
-    for(var i = 0; i < points.length; i++){
-        points[i].x = points[i].x * wr * s,
-        points[i].y = points[i].y * hr * s;
+function CalculatePoints(points ,p , wr, hr, s){
+    for(var i = 0; i < points.length; i++){        
+        points[i].x = eval(("wr * " + points[i].x).replace("{p}",p)) * s,
+        points[i].y = eval(("hr * " + points[i].y).replace("{p}",p)) * s;
     }
     return points;
 }
 
-function CalculateOriginPoint(point, wr, hr, s){
-    point.x = point.x * wr * s,
-    point.y = point.y * hr * s;
+function CalculateOriginPoint(point, p, wr, hr, s){
+    point.x = eval(("wr * " + point.x).replace("{p}",p)) * s,
+    point.y = eval(("hr * " + point.y).replace("{p}",p)) * s;
     return point;
 }
 
@@ -62,7 +64,7 @@ var wd_parse_json = {
             var len = instruction.length;
             
             for(var i = 0; i < len; i++){
-                var layer = GetLayer(instruction[i], 1, 1, s);
+                var layer = GetLayer(instruction[i], 1, 1, 1, s);
                 group.addWithUpdate(layer);
             }
         }else{
@@ -72,7 +74,7 @@ var wd_parse_json = {
         canvas.add(group);
     },
     
-    Update : function (instruction, wr, hr, s){
+    Update : function (instruction, pr, wr, hr, s){
         canvas.clear();
     
         var group = new fabric.Group([],{
@@ -83,7 +85,7 @@ var wd_parse_json = {
             var len = instruction.length;
             
             for(var i = 0; i < len; i++){
-                var layer = GetLayer(instruction[i], wr, hr, s);
+                var layer = GetLayer(instruction[i], pr, wr, hr, s);
                 group.addWithUpdate(layer);
             }
         }else{
