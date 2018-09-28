@@ -14,28 +14,14 @@ var testWindow1 = {
         "c": [
             {
                 "r": [
-                    { f: 0, od: "u" },
-                    { f: 0, od: "u" }
+                    { h: 200, f: 0, od: "u" },
+                    { h: 200, f: 0, od: "u" }
                 ]
             },
             {
                 "r": [
-                    { f: 0, od: "u" },
-                    { f: 0, od: "u" }
-                ]
-            },
-            {
-                "r": [
-                    { f: 0, od: "u" },
-                    { f: 0, od: "u" },
-                    { f: 0, od: "u" },
-                    { f: 0, od: "u" }
-                ]
-            },
-            {
-                "r": [
-                    { f: 0, od: "u" },
-                    { f: 1 }
+                    { h: 375, f: 0, od: "u" },
+                    { h: 375, f: 1 }
                 ]
             }
         ]
@@ -166,22 +152,39 @@ function parseJson(layout, w, h, p, { ox = 0, oy = 0, draw = orientation.col, no
         var count = layout.c.length;
 
         for (var i = 0; i < count; i++) {
-            var col = parseJson(layout.c[i], w / count, h, p, { ox: (i * w / count), oy: oy, draw: draw });
+            var colWidth, cox;
+
+            if(layout.c[i].w != undefined){
+                colWidth = layout.c[i].w;
+                cox = layout.c[i].w;
+            }else{
+                colWidth = w / count;
+                cox = (i * w / count);
+            }
+
+            var col = parseJson(layout.c[i], colWidth, h, p, { ox: cox, oy: oy, draw: draw });
             result.push(col);
         }
     } else if (layout.r != undefined) {
         var count = layout.r.length;
         var height = 0;
+        var roy;
 
         for (var i = 0; i < layout.r.length; i++) {
 
             if (draw === orientation.col) {
                 if (i === 0)
                     height = h;
-                else
+                else if(layout.r[i].h != undefined){
+                    height = layout.r[i].h
+                    roy = layout.r[i].h;
+                }else{
                     height = h / count;
+                    roy = (i * h / count);
+                }
+                    
             }
-            var row = parseJson(layout.r[i], w, height, p, { ox: ox, oy: (i * h / count), draw: draw, no: i });
+            var row = parseJson(layout.r[i], w, height, p, { ox: ox, oy: roy, draw: draw, no: i });
             result.push(row);
         }
     } else {
