@@ -1,32 +1,42 @@
 /*
  * magic.js by dinh group 2018
  * canvas drawing of windows using fabric js
- *
+ * 
  */
+
+
+// notes 
+// need to move center of separater to point
+
 
 // style 280
 var testWindow1 = {
 
-    "w": 1000,
+    "w": 1200,
     "h": 1000,
-    "p": 60,
-    "layout": {
-        "c": [
-            {
-                "r": [
-                    { f: 0, od: "u" },
-                    { h: 400, f: 0, od: "u" },
-                    { h: 600, f: 0, od: "u" }
-                ]
-            },
-            {
-                "r": [
-                    { f: 0, od: "u" },
-                    { h: 400, f: 1 }
-                ]
-            }
-        ]
-    }
+    "pw": 60,
+    "pc": "white",
+    "hd": 1,
+    "layout": [
+        {
+            "r": [
+                { f: 0, od: "l" }
+                
+            ]
+        },
+        {
+            "w": 600,
+            "r": [
+                { f: 0, od: "u", h: 375 },
+                { f: 1 }
+            ]
+        },
+        {
+            "r": [
+                { f: 0, od: "u" }
+            ]
+        }
+    ]
 };
 
 var testWindow2 = {
@@ -39,6 +49,7 @@ var testWindow2 = {
             {
                 "c": [
                     { f: 1 },
+                    { f: 0, od: "l" },
                     { f: 0, od: "l" }
                 ]
             }
@@ -46,41 +57,37 @@ var testWindow2 = {
     }
 };
 
-const orientation = {
-    col: 'c',
-    row: 'r'
-}
-
 var profileWidth = 60;
 var c = window._canvas = new fabric.Canvas('c', {
-    preserveObjectStacking: true // keeps objects in order when selected / highlighted
+    preserveObjectStacking: true, // keeps objects in order when selected / highlighted
+    selection: false
+
 });
 
 var group;
 
-var model = [];
-
-var frameOpts = {
-    width: 500, // width in mm
-    height: 500, // height in mm
-    profileWidth: 60, // profile in mm
-
-    isWindow: false, // is window or just frame
-    isFixed: true, // can be opened
-    openDirection: "d", // requires isFixed to be false
-    hasVent: true, // draw vent or not
-    profileColor: "white", // profile color
+var drawOptions = {
     glassColor: "skyblue", // glass color
     openingLineColor: "", // opening line color
     highDetailMode: true, // draw extra lines to make pretty
 
     scale: 1, // not changable. used for calculation
+}
+
+var frameOpts = {
+    width: 300, // width in mm
+    height: 400, // height in mm
+    profileWidth: 60, // profile in mm
+
+    isWindow: true, // is window or just frame
+    isFixed: false, // can be opened
+    openDirection: "d", // requires isFixed to be false
+    hasVent: true, // draw vent or not
+    //profileColor: "white", // profile color
+
 };
 
-
-drawWindowJson(testWindow1);
-
-function drawWindowJson(json) {
+function drawWindowJson(json, opts) {
 
     var squares = countSquares(json.layout);
 
@@ -88,131 +95,31 @@ function drawWindowJson(json) {
 
     // draw base frame
 
-    var detailJson = parseJson(json.layout, json.w, json.h, json.p);
-    console.log(detailJson);
-    //return;
-    var opts = {
-        width: json.w, // width in mm
-        height: json.h, // height in mm
-        profileWidth: json.p, // profile in mm
+    // read options this should not be inside here
+    opts.width = json.w;
+    opts.height = json.h;
+    opts.profileWidth = json.pw;
 
-        isWindow: false, // is window or just frame
-        isFixed: true, // can be opened
-        openDirection: "d", // requires isFixed to be false
-        hasVent: true, // draw vent or not
-        profileColor: "white", // profile color
-        glassColor: "skyblue", // glass color
-        openingLineColor: "", // opening line color
-        highDetailMode: true, // draw extra lines to make pretty
+    // create new group to clear
+    group = new fabric.Group([], {
+        hasBorders: true,
+        hasControls: false,
+        hasRotatingPoint: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        hoverCursor: 'pointer',
+        borderScaleFactor: 5
+    });
+    c.clear();
 
-        scale: 1, // not changable. used for calculation
-    };
+    console.log("drawWindow opts", opts);
 
-    drawWindow(opts)
 
-    var s = calculateScale(opts);
-    var offset = {
-        x: ((c.width / 2) - (json.w * s / 2)),
-        y: ((c.height / 2) - (json.h * s / 2))
-    };
-    var arrayBringToFront = [];
-
-    var countCol = detailJson.length;
-    for (var i = 0; i < detailJson.length; i++) {
-        var countRow = detailJson[i].length;
-        for (var j = 0; j < detailJson[i].length; j++) {
-            var element = detailJson[i][j];
-
-            if (element.ox !== 0 || element.oy !== 0) {
-                if (element.draw === orientation.col) {
-                    c.add(drawProfileLength({
-                        x: 0 + offset.x + (element.ox - element.p * i / countCol) * s,
-                        y: 0 + offset.y + element.oy + (element.p * s / 2)
-                    }, element.h - element.p, element.p, "hd", s, opts));
-                } else {
-                    c.add(drawProfileLength({
-                        x: 0 + (element.ox - (element.p * i / countCol) + element.p / 2) * s + offset.x,
-                        y: 0 + (element.oy - element.p * j / countRow) * s + offset.y
-                    }, element.w - element.p / countCol, element.p, "vd", s, opts));
-                    arrayBringToFront.push(c.getObjects().length - 1);
-                }
-            }
-        }
-    }
-    
-    for (var i = 0; i < arrayBringToFront.length; i++) {
-        c.item(arrayBringToFront[i] - i).bringToFront();
-    }
+    drawFrame1(json);
 
 }
 
-function parseJson(layout, w, h, p, { ox = 0, oy = 0, draw = orientation.col, no = 0 } = {}) {
-    var result = [];
-
-    if (layout.c != undefined) {
-        var count = layout.c.length;
-
-        for (var i = 0; i < count; i++) {
-            var colWidth, cox;
-
-            if(layout.c[i].w != undefined){
-                colWidth = layout.c[i].w;
-                cox = layout.c[i].w;
-            }else{
-                colWidth = w / count;
-                cox = (i * w / count);
-            }
-
-            var col = parseJson(layout.c[i], colWidth, h, p, { ox: cox, oy: oy, draw: draw });
-            result.push(col);
-        }
-    } else if (layout.r != undefined) {
-        var count = layout.r.length;
-        var height = 0;
-        var roy;
-
-        for (var i = 0; i < layout.r.length; i++) {
-
-            if (draw === orientation.col) {
-                if (i === 0)
-                    height = h;
-                else if(layout.r[i].h != undefined){
-                    height = layout.r[i].h
-                    roy = layout.r[i].h;
-                }else{
-                    height = h / count;
-                    roy = (i * h / count);
-                }
-                    
-            }
-            var row = parseJson(layout.r[i], w, height, p, { ox: ox, oy: roy, draw: draw, no: i });
-            result.push(row);
-        }
-    } else {
-        layout.w = w;
-        layout.p = p;
-        layout.h = h;
-        layout.ox = ox;
-        layout.oy = oy;
-
-        if (draw === orientation.col) {
-            if (no === 0)
-                layout.draw = orientation.col;
-            else
-                layout.draw = orientation.row;
-        } else {
-            if (no === 0)
-                layout.draw = orientation.row;
-            else
-                layout.draw = orientation.col;
-        }
-
-        console.log(layout);
-        return layout;
-    }
-    return result;
-}
-
+/* count squares for fun */
 function countSquares(j) {
     // console.log("count start", j);
     var count = 0;
@@ -257,6 +164,7 @@ function cs2(layout) {
 
 }
 
+drawWindowJson(testWindow1, frameOpts);
 
 //drawWindow(frameOpts);
 
@@ -265,24 +173,16 @@ $("#view").on('click', function () {
 });
 
 $("#width, #height, #profile").on('change', function () {
-    //drawWindow(frameOpts);
-    
-    testWindow1.w = parseInt($("#width").val());
-    testWindow1.h = parseInt($("#height").val());
-    testWindow1.p = parseInt($("#profile").val());
-
-    drawWindowJson(testWindow1);
-
-
+    drawWindow(frameOpts);
 });
 
 
 function drawWindow(opts) {
 
     // read options this should not be inside here
-    //opts.width = parseInt($("#width").val());
-    //opts.height = parseInt($("#height").val());
-    //opts.profileWidth = parseInt($("#profile").val());
+    opts.width = parseInt($("#width").val());
+    opts.height = parseInt($("#height").val());
+    opts.profileWidth = parseInt($("#profile").val());
 
     // create new group to clear
     group = new fabric.Group([], {
@@ -301,14 +201,14 @@ function drawWindow(opts) {
     drawFrame(opts);
 }
 
-function calculateScale(opts) {
+function calculateScale(j) {
     var canvas = document.getElementById('c');
     var width = canvas.width;
     var height = canvas.height;
 
     // add spacing for scale lables here
-    var w = opts.width + 50;
-    var h = opts.height + 50;
+    var w = j.w + 50;
+    var h = j.h + 50;
     var s = 1;
 
     if (width > height) {
@@ -321,6 +221,154 @@ function calculateScale(opts) {
     return s;
 }
 
+function drawFrame1(opts) {
+
+    console.log("drawframe 1 ", opts);
+    var w = opts.w;
+    var h = opts.h;
+    var p = opts.pw;
+
+    var s = calculateScale(opts);
+    var canvas = document.getElementById('c');
+
+    var offset = {
+        x: ((canvas.width / 2) - (w * s / 2)),
+        y: ((canvas.height / 2) - (h * s / 2))
+    };
+
+    // draw glass first
+    if (opts.isWindow) {
+        c.add(
+            drawGlass({
+                x: 0 + offset.x + (p * s),
+                y: 0 + offset.y + (p * s)
+            },
+                (w - (p * 2)) * s,
+                (h - (p * 2)) * s,
+                opts));
+    }
+
+    c.add(drawProfileLength({
+        x: 0 + offset.x,
+        y: 0 + offset.y
+    }, w, p, "hb", s, opts));
+
+    c.add(drawCircle({
+        x: 0 + offset.x,
+        y: 0 + offset.y
+    }));
+
+
+    c.add(drawProfileLength({
+        x: 0 + offset.x,
+        y: 0 + offset.y
+    }, h, p, "vr", s, opts));
+
+    c.add(drawProfileLength({
+        x: ((w - p) * s) + offset.x,
+        y: 0 + offset.y
+    }, h, p, "vl", s, opts));
+
+    c.add(drawCircle({
+        x: ((w - p) * s) + offset.x,
+        y: 0 + offset.y
+    }));
+
+    c.add(drawCircle({
+        x: ((w) * s) + offset.x,
+        y: 0 + offset.y
+    }));
+
+
+    c.add(drawProfileLength({
+        x: 0 + offset.x,
+        y: ((h - p) * s) + offset.y
+    }, w, p, "ht", s, opts));
+
+    var lineOpt = {
+        stroke: 'rgba(0,255,255,1)',
+        strokeWidth: 2,
+        evented: false
+    };
+
+    // draw separators for cols
+    var cols = opts.layout.length;
+    var colX = (p / 2) * s; // x start
+    var colGap = ((w - p) / (cols)) * s;
+    console.log("cols: " + (cols - 1));
+
+    // -1 because u only need one less separater
+    for (var i = 0; i < cols - 1; i++) {
+        //console.log(i);
+
+        // do it first as we missing one col so we move it in
+        colX += colGap;
+
+        // draw vertical 
+        c.add(drawProfileLength({
+            x: (colX + offset.x),
+            y: ((p / 2) * s) + offset.y
+        }, (h - p), p, "vd", s, opts));
+
+        console.log("offsetx " + offset.x);
+
+        c.add(drawCircle({
+            x: (colX + offset.x),
+            y: ((p / 2) * s) + offset.y
+        }));
+    }
+
+    // col loop again to calculate x start
+    colX = (p / 2) * s; // x start
+    colGap = ((w - p) / (cols)) * s;
+
+    // loop for every cols
+    for (var i = 0; i < cols; i++) {
+        
+        var rows = opts.layout[i].r.length;
+        var rowY = (p / 2) * s;
+        var rowGap = ((h - p) / (rows)) * s;
+        var rowW = ((w-p) / cols);
+
+        console.log("h " + h + " rows " + rows + " rowgap " + rowGap);
+        for (var j = 0; j < rows -1 ; j++) {
+
+            rowY += rowGap;
+            console.log("rowY " + rowY);
+            c.add(drawProfileLength({
+                x: colX + offset.x,
+                y: rowY + offset.y
+            }, rowW, p, "hd", s, opts));
+
+            c.add(drawCircle({
+                x: colX + offset.x,
+                y: rowY + offset.y
+            }));
+
+        }
+
+        colX += colGap;
+    }
+
+    // reset for vert
+
+    // c.add(drawProfileLength({
+    //     x: 0 + ((p / 2) * s) + offset.x,
+    //     y: (((h / 2) - (p / 2)) * s) + offset.y
+    // }, w - p, p, "hd", s, opts));
+
+    // c.add(drawProfileLength({
+    //     x: (((w / 2) - (p / 2)) * s) + offset.x,
+    //     y: ((p / 2) * s) + offset.y
+    // }, (h / 2) - (p / 2), p, "vd", s, opts));
+
+    // c.add(drawProfileLength({
+    //     x: (((w / 2) - (p / 2)) * s) + offset.x,
+    //     y: (((h / 2)) * s) + offset.y
+    // }, (h / 2) - (p / 2), p, "vd", s, opts));
+
+
+}
 
 function drawFrame(opts) {
 
@@ -368,6 +416,9 @@ function drawFrame(opts) {
         x: 0 + offset.x,
         y: ((h - p) * s) + offset.y
     }, w, p, "ht", s, opts));
+}
+
+function drawDivider(o, w, h, opts) {
 
 }
 
@@ -449,6 +500,31 @@ function drawLineToGroup() {
     c.add(new fabric.Line(l, opt));
 }
 
+function drawCircle(o) {
+    var grp = new fabric.Group([], {
+        hasBorders: false,
+        hasControls: false,
+        hasRotatingPoint: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        hoverCursor: 'pointer',
+        hasBorders: false,
+        // borderScaleFactor: 5
+    });
+
+    grp.addWithUpdate(
+        new fabric.Circle({
+            left: o.x,
+            top: o.y,
+            strokeWidth: 1,
+            radius: 1,
+            fill: '#f00',
+            stroke: '#f00'
+        }));
+
+    return grp;
+}
+
 function drawProfileLength(o, l, pw, d, s, opts) {
 
     var grp = new fabric.Group([], {
@@ -465,7 +541,7 @@ function drawProfileLength(o, l, pw, d, s, opts) {
     //console.log(o);
     var p = [];
 
-    // highlight points
+    // highlight points 
     // disable in low quality mode
     var outerHl = [];
     var innerHl = [];
@@ -606,86 +682,89 @@ function drawProfileLength(o, l, pw, d, s, opts) {
             break;
 
         // dividers
-        case "hd":
-            p = [{
-                x: o.x + 0,
-                y: o.y + ((pw / 2) * s)
-            },
-            {
-                x: o.x + ((pw / 2) * s),
-                y: o.y + 0
-            },
-            {
-                x: o.x + (pw * s),
-                y: o.y + ((pw / 2) * s)
-            },
-            {
-                x: o.x + (pw * s),
-                y: o.y + ((l - pw / 2) * s)
-            },
-            {
-                x: o.x + ((pw / 2) * s),
-                y: o.y + (l * s)
-            },
-            {
-                x: o.x + 0,
-                y: o.y + ((l - pw / 2) * s)
-            }
-            ];
-
-            outerHl = [
-                o.x + ((pw * 0.15) * s),
-                o.y + ((pw / 2 * 0.75) * s),
-                o.x + ((pw * 0.15) * s),
-                o.y + ((l - (pw / 2) * 0.75) * s)
-            ];
-
-            innerHl = [
-                o.x + ((pw * 0.85) * s),
-                o.y + ((pw / 2 * 0.75) * s),
-                o.x + ((pw * 0.85) * s),
-                o.y + ((l - pw / 2 * 0.75) * s)
-            ];
-            break;
         case "vd":
-            p = [{
-                x: o.x + 0,
-                y: o.y + ((pw / 2) * s)
-            },
-            {
-                x: o.x + ((pw / 2) * s),
-                y: o.y + 0
-            },
-            {
-                x: o.x + ((l - (pw / 2)) * s),
-                y: o.y + 0
-            },
-            {
-                x: o.x + (l * s),
-                y: o.y + (pw / 2 * s)
-            },
-            {
-                x: o.x + ((l - (pw / 2)) * s),
-                y: o.y + (pw * s)
-            },
-            {
-                x: o.x + ((pw / 2) * s),
-                y: o.y + (pw * s)
-            }
+            p = [
+                {
+                    x: o.x + 0,
+                    y: o.y + 0
+                },
+                {
+                    x: o.x + ((pw / 2) * s),
+                    y: o.y + ((pw / 2) * s)
+                },
+                {
+                    x: o.x + ((pw / 2) * s),
+                    y: o.y + ((l - (pw / 2)) * s)
+                },
+                {
+                    x: o.x + 0,
+                    y: o.y + ((l) * s)
+                },
+                {
+                    x: o.x + (-(pw / 2) * s),
+                    y: o.y + ((l - (pw / 2)) * s)
+                },
+                {
+                    x: o.x + (-(pw / 2) * s),
+                    y: o.y + ((pw / 2) * s)
+                }
             ];
-            
+
             outerHl = [
-                o.x + ((pw / 2 * 0.75) * s),
-                o.y + ((pw * 0.15) * s),
-                o.x + ((l - pw / 2 * 0.75) * s),
-                o.y + ((pw * 0.15) * s)
+                o.x + (-(pw * 0.35) * s),
+                o.y + ((pw * 0.35) * s),
+                o.x + (-(pw * 0.35) * s),
+                o.y + ((l - pw * 0.35) * s)
             ];
 
             innerHl = [
-                o.x + ((pw / 2 * 0.75) * s),
-                o.y + ((pw * 0.85) * s),
-                o.x + ((l - pw / 2 * 0.75) * s),
-                o.y + ((pw * 0.85) * s)
+                o.x + ((pw * 0.35) * s),
+                o.y + ((pw * 0.35) * s),
+                o.x + ((pw * 0.35) * s),
+                o.y + ((l - pw * 0.35) * s)
+            ];
+
+            break;
+        case "hd":
+            p = [
+            {
+                x: o.x + 0,
+                y: o.y + 0
+            },
+            {
+                x: o.x + ((pw/2)* s),
+                y: o.y + (-(pw/2)* s)
+            },
+            {
+                x: o.x + ((l -(pw / 2))* s),
+                y: o.y + (-(pw/2)* s)
+            },
+            {
+                x: o.x + ((l) * s),
+                y: o.y + 0
+            },
+            {
+                x: o.x + ((l -(pw / 2))* s),
+                y: o.y + ((pw/2)* s)
+            },
+            {
+                x: o.x + ((pw/2)* s),
+                y: o.y + ((pw / 2) * s)
+            },
+            ];
+
+            outerHl = [
+                o.x + ((pw * 0.35) * s),
+                o.y + (-(pw * 0.35) * s),
+                o.x + ((l - (pw * 0.35)) * s),
+                o.y + (-(pw * 0.35) * s)
+            ];
+
+            innerHl = [
+                o.x + ((pw * 0.35) * s),
+                o.y + ((pw * 0.35) * s),
+                o.x + ((l - (pw * 0.35)) * s),
+                o.y + ((pw * 0.35) * s)
             ];
             break;
     }
@@ -693,7 +772,7 @@ function drawProfileLength(o, l, pw, d, s, opts) {
     // draw it
     console.log(d, p);
     grp.addWithUpdate(new fabric.Polygon(p, {
-        fill: opts.profileColor,
+        fill: opts.pc,
         selectable: true,
         objectCaching: false,
         strokeWidth: 1,
@@ -709,9 +788,9 @@ function drawProfileLength(o, l, pw, d, s, opts) {
     }));
     //group.addWithUpdate();
 
-    if (opts.highDetailMode) {
+    if (opts.hd) {
         if (outerHl.length > 0) {
-            console.log("draw highlights ", outerHl);
+            //console.log("draw highlights ", outerHl);
             grp.addWithUpdate(new fabric.Line(outerHl, {
                 // fill: 'red',
                 stroke: 'rgba(0,0,0,0.2)',
@@ -722,7 +801,7 @@ function drawProfileLength(o, l, pw, d, s, opts) {
         }
 
         if (innerHl.length > 0) {
-            console.log("draw highlights ", innerHl);
+            //console.log("draw highlights ", innerHl);
             grp.addWithUpdate(new fabric.Line(innerHl, {
                 // fill: 'red',
                 stroke: 'rgba(0,0,0,0.2)',

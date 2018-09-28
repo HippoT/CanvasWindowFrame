@@ -1,0 +1,17 @@
+tuna's window designer
+
+- draw glass
+- draw scales
+- draw opening
+- draw handles
+- change color on highlight / hover
+	- when select group, select all items in group and give filter
+	- blend color, tint, x color.
+	- attach to event
+
+
+minor
+- change icon when select group - done
+
+
+- slee
