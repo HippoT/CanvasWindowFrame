@@ -78,7 +78,7 @@ var frameOpts = {
 };
 
 
-drawWindowJson(testWindow1);
+//drawWindowJson(testWindow1);
 
 function drawWindowJson(json) {
 
@@ -271,7 +271,7 @@ $("#width, #height, #profile").on('change', function () {
     testWindow1.h = parseInt($("#height").val());
     testWindow1.p = parseInt($("#profile").val());
 
-    drawWindowJson(testWindow1);
+    //drawWindowJson(testWindow1);
 
 
 });
