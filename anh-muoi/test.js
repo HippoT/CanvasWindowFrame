@@ -1,3 +1,41 @@
+// var myTestWindow = {
+//     "w": 1200,
+//     "h": 1000,
+//     "pw": 60,
+//     "pc": "white",
+//     "hd": 1,
+//     "layout": {
+//         'c': [
+//             {
+//                 "r": [
+//                     { f: 0, od: "l" }
+
+//                 ]
+//             },
+//             {
+//                 "w": 600,
+//                 "r": [
+//                     {
+//                         c: [
+//                             { f: 0, od: "u", w: 375 },
+//                             { f: 0, od: "u", }
+//                         ]
+//                     },
+
+//                     { f: 0, od: "u", h: 375 },
+//                     { f: 1 }
+//                 ]
+//             },
+//             {
+//                 "r": [
+//                     { f: 0, od: "u" }
+//                 ]
+//             }
+//         ]
+
+//     }
+// };
+
 var myTestWindow = {
     "w": 1200,
     "h": 1000,
@@ -5,43 +43,26 @@ var myTestWindow = {
     "pc": "white",
     "hd": 1,
     "layout": {
-        'c': [
+        "r": [
             {
-                "r": [
-                    { f: 0, od: "l" }
-
+                c: [
+                    { f: 0, od: "u", w: 375 },
+                    { f: 0, od: "u", }
                 ]
             },
-            {
-                "w": 600,
-                "r": [
-                    {
-                        c: [
-                            { f: 0, od: "u", w: 375 },
-                            { f: 0, od: "u", }
-                        ]
-                    },
 
-                    { f: 0, od: "u", h: 375 },
-                    { f: 1 }
-                ]
-            },
-            {
-                "r": [
-                    { f: 0, od: "u" }
-                ]
-            }
+            { f: 0, od: "u", h: 375 },
+            { f: 1 }
         ]
-
     }
 };
 
-function drawCuaSo(json){
+function drawCuaSo(json) {
     var options = {
         width: json.w, // width in mm
         height: json.h, // height in mm
         profileWidth: json.pw, // profile in mm
-    
+
         isWindow: false, // is window or just frame
         isFixed: true, // can be opened
         openDirection: "d", // requires isFixed to be false
@@ -50,7 +71,7 @@ function drawCuaSo(json){
         glassColor: "skyblue", // glass color
         openingLineColor: "", // opening line color
         highDetailMode: true, // draw extra lines to make pretty
-    
+
         scale: 1, // not changable. used for calculation
     };
 
@@ -60,7 +81,7 @@ function drawCuaSo(json){
         y: ((c.height / 2) - (json.h * s / 2))
     };
     console.log(JSON.stringify(json));
-    
+
     drawWindow(options);
     drawWithJson(json.layout, json.w, json.h, offset, s, options);
 }
@@ -71,37 +92,41 @@ function drawWithJson(layout, w, h, offset, s, options) {
         var count = layout.c.length;
         var offsetW = 0;
 
-        for (var i = 0; i < count; i++){
-            if(layout.c[i].ox < w){
+        for (var i = 0; i < count; i++) {
+            if (layout.c[i].ox < w) {
                 var element = layout.c[i];
+                console.log("height: ", element.h);
+
                 c.add(drawProfileLength({
-                    x: 0 + offset.x + (element.ox - element.pw * i / count) * s,
+                    x: 0 + offset.x + (element.ox - element.pw * (i + 1) / count) * s,
                     y: 0 + offset.y + element.oy + (element.pw * s / 2)
                 }, element.h - element.pw, element.pw, "hd", s, options));
             }
         }
 
-        for(var i = 0; i < count; i++){
+        for (var i = 0; i < count; i++) {
             offsetW += layout.c[i].w;
             drawWithJson(layout.c[i], offsetW, h, offset, s, options);
         }
-    }else if(layout.r !== undefined){
+    } else if (layout.r !== undefined) {
         var count = layout.r.length;
         var offsetH = 0;
 
-        for(var i = 0; i < count; i++){
-            if(layout.r[i].oy < h){
+        for (var i = 0; i < count; i++) {
+            if (layout.r[i].oy < h) {
                 var element = layout.r[i];
+                console.log("vd: ", element.oy);
+
                 c.add(drawProfileLength({
                     // x: 0 + (element.ox - (element.pw * i / count) + element.pw / 2) * s + offset.x,
                     // y: 0 + (element.oy - element.pw * i / count) * s + offset.y
-                    x: 0 + (element.ox - (element.pw * i / count) + element.pw / 2) * s + offset.x,
-                    y: 0 + (element.oy - element.pw * i / count) * s + offset.y
-                }, element.w - element.pw / count, element.pw, "vd", s, options));
+                    x: 0 + (element.ox + element.pw / 2) * s + offset.x,
+                    y: 0 + (element.oy - element.pw * (i + 1) / count) * s + offset.y
+                }, element.w - element.pw, element.pw, "vd", s, options));
             }
         }
 
-        for(var i = 0; i < count; i++){
+        for (var i = 0; i < count; i++) {
             offsetH += layout.r[i].h;
             drawWithJson(layout.r[i], w, offsetH, offset, s, options);
         }
