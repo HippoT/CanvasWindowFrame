@@ -102,10 +102,10 @@ function drawWindow(json) {
     console.log(JSON.stringify(json));
 
     drawWindow(options);
-    drawWithJson(json.layout, json.w, json.h, offset, s, options);
+    drawByJson(json.layout, json.w, json.h, offset, s, options);
 }
 
-function drawWithJson(layout, w, h, offset, s, options) {
+function drawByJson(layout, w, h, offset, s, options) {
 
     if (layout.c !== undefined) {
         var count = layout.c.length;
@@ -122,7 +122,7 @@ function drawWithJson(layout, w, h, offset, s, options) {
 
         for (var i = 0; i < count; i++) {
             offsetW += layout.c[i].w;
-            drawWithJson(layout.c[i], offsetW, h, offset, s, options);
+            drawByJson(layout.c[i], offsetW, h, offset, s, options);
         }
     } else if (layout.r !== undefined) {
         var count = layout.r.length;
@@ -141,7 +141,7 @@ function drawWithJson(layout, w, h, offset, s, options) {
 
         for (var i = 0; i < count; i++) {
             offsetH += layout.r[i].h;
-            drawWithJson(layout.r[i], w, offsetH, offset, s, options);
+            drawByJson(layout.r[i], w, offsetH, offset, s, options);
         }
     }
 }
@@ -263,7 +263,7 @@ function calWidthAndHeight(data, obj, key, index) {
     return data;
 }
 
-function addProfileWidthParent(layout, ol, or, ot, ob, oh, ow) {
+function addParentProfileWidth(layout, ol, or, ot, ob, oh, ow) {
 
     if (layout.c !== undefined) {
         var count = layout.c.length;
@@ -284,7 +284,7 @@ function addProfileWidthParent(layout, ol, or, ot, ob, oh, ow) {
         }
 
         for (var i = 0; i < count; i++) {
-            layout.c[i] = addProfileWidthParent(layout.c[i], layout.c[i].ol, layout.c[i].or, layout.c[i].ot, layout.c[i].ob, oh, ow);
+            layout.c[i] = addParentProfileWidth(layout.c[i], layout.c[i].ol, layout.c[i].or, layout.c[i].ot, layout.c[i].ob, oh, ow);
         }
     } else if (layout.r !== undefined) {
         var count = layout.r.length;
@@ -305,7 +305,7 @@ function addProfileWidthParent(layout, ol, or, ot, ob, oh, ow) {
         }
 
         for (var i = 0; i < count; i++) {
-            layout.r[i] = addProfileWidthParent(layout.r[i], layout.r[i].ol, layout.r[i].or, layout.r[i].ot, layout.r[i].ob, oh, ow);
+            layout.r[i] = addParentProfileWidth(layout.r[i], layout.r[i].ol, layout.r[i].or, layout.r[i].ot, layout.r[i].ob, oh, ow);
         }
     }
     layout.oh = oh;
@@ -374,7 +374,7 @@ function calibrationWH(layout) {
 myTestWindow.layout = calibrationJson(myTestWindow.layout, myTestWindow.w, myTestWindow.h, myTestWindow.pw);
 
 myTestWindow.layout = addOffset(myTestWindow.layout);
-myTestWindow.layout = addProfileWidthParent(myTestWindow.layout, myTestWindow.pw, myTestWindow.pw, myTestWindow.pw, myTestWindow.pw, myTestWindow.h, myTestWindow.w);
+myTestWindow.layout = addParentProfileWidth(myTestWindow.layout, myTestWindow.pw, myTestWindow.pw, myTestWindow.pw, myTestWindow.pw, myTestWindow.h, myTestWindow.w);
 
 myTestWindow.layout = calibrationWH(myTestWindow.layout);
 //console.log(JSON.stringify(myTestWindow.layout));
